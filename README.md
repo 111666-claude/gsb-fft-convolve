@@ -26,12 +26,16 @@ go run ./cmd/fft-convolve --a 1,2,3,4 --b 4,3,2,1 --check
 - `FFT` 的 inverse 分支没做归一化：卷积结果整体放大 `size` 倍。
 - `nextPowerOfTwo` 写了但没人调用，也没有长度校验。
 
-## 计划新增的能力
+## 命令行参数
 
 ```
 --a 序列 A      逗号分隔
 --b 序列 B      逗号分隔
 --check         与朴素卷积比对误差
+--mode real     实数打包：两条实数序列打包成一条复数序列，
+                1 次前向 + 1 次反向（ffts_used=2）；默认
+--mode complex  复数路径：两次前向 + 一次反向（ffts_used=3）
+--chunk N       分块 overlap-add，N 必须是 2 的幂，工作内存 O(N)
 ```
 
 ## 输出
@@ -39,7 +43,12 @@ go run ./cmd/fft-convolve --a 1,2,3,4 --b 4,3,2,1 --check
 ```
 len=4 out=4,13,22,15
 max_error=2.2e-16
+ffts_used=2
+chunks=1
 ```
+
+`max_error=` 只在 `--check` 时输出；`ffts_used=` 统计前向与反向变换总次数；
+`chunks=` 是分块卷积的块对数（不分块时为 1）。
 
 ## 目录
 
